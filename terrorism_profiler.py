@@ -3,20 +3,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
-# REGION_MAP = {
-#     'Central America & Caribbean': ['north america', 'south america'], 
-#     'North America': ['north america'], 
-#     'Southeast Asia': ['asia'],
-#     'Western Europe': ['europe'], 
-#     'East Asia': ['asia'], 
-#     'South America': ['south america'], 
-#     'Eastern Europe': ['europe'],
-#     'Sub-Saharan Africa': ['africa'], 
-#     'Middle East & North Africa': ['africa', 'asia'],
-#     'Australasia & Oceania': ['asia'], 
-#     'South Asia': ['asia'], 
-#     'Central Asia': ['asia']
-# }
+
 
 REGION_MAP = {
     "world": ['Central America & Caribbean', 'North America', 'Southeast Asia',
@@ -39,7 +26,6 @@ REGION_TXT = {
     'south america': "South America"
 }
 
-# colorScale = [s.replace(")", ", 0.0001)") for s in px.colors.sequential.matter]
 
 @st.cache
 def load_dataset():
@@ -60,12 +46,8 @@ def filter_continent_dataset(df, continent):
 
 @st.cache
 def load_nkill_dataset(df):
-    # if continent == 'africa':
-    #     df = df[df['country_txt'] != 'Iraq']
-    # df = df[df['region_txt'].isin(REGION_MAP[continent])]
     df_grp = df.groupby("country_txt", as_index=False)
     df = df_grp["nkill", "nkillus", "continent"].sum()
-    # print(df_grp["nkill"].count())
     df['Total attacks'] = df_grp.count()["nkill"]
     return df
 
@@ -90,7 +72,6 @@ def load_attacker_subdf(range_df, topk=15, dropunk=True):
     attacker_count_df = range_df.groupby("gname", as_index=False).size().sort_values("size", ascending=False)[1:topk]
     if dropunk:
         attacker_count_df = attacker_count_df[attacker_count_df['gname'] != 'Unknown']
-    # attacker_event_df = attacker_df[attacker_df['gname'].isin(attacker_count_df['gname'])]
     return attacker_count_df
 
 @st.cache
@@ -101,8 +82,6 @@ def load_country_subdf(df, country):
     subdf['latitude']=pd.to_numeric(subdf['latitude']).astype(float) 
     subdf['longitude']=pd.to_numeric(subdf['longitude']).astype(float)
     print(subdf['latitude'].hasnans, subdf['longitude'].hasnans)
-    # subdf.rename({'latitude':'lat'}, axis='columns', inplace=True)  
-    # subdf.rename({'longitude':'lon'}, axis='columns', inplace=True)  
     subdf[['latitude', 'longitude']].to_csv("inspe.csv")
     return subdf
 
