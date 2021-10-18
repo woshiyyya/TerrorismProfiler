@@ -58,6 +58,12 @@ def filter_attacktype_dataset(df, types):
     return df[df['attacktype1_txt'].isin(types)]
 
 @st.cache
+def filter_gname_dataset(df, gname):
+    if gname == 'all':
+        return df
+    return df[df['gname'] == gname]
+
+@st.cache
 def load_attacktype_counts_by_time(df):
     return df.groupby(["attacktype1_txt", "iyear"], as_index=False).size()
 
@@ -97,6 +103,9 @@ def gen_country_profile(country_df):
 def country_list(df):
     return sorted(list(df['country_txt'].unique()))
 
+@st.cache
+def terrorism_groups(df):
+    return ['all'] + sorted(list(df["gname"].unique()))
 
 def colorscale():
     scale = px.colors.diverging.RdYlGn[::-1][2:]
@@ -125,6 +134,7 @@ if __name__ == "__main__":
     ('world', 'europe', 'asia', 'africa', 'north america', 'south america'))
 
     attacktypes = st.sidebar.multiselect('Attack Types', attackTypes(df), ['all'])
+    selectgroup = st.sidebar.selectbox("Terrorism Groups", options=terrorism_groups(df))
     killstart, killend = st.sidebar.slider('Years', 1970, 2017, (1986, 2002), 1)
 
     # Global Terrorism Density:
@@ -137,7 +147,8 @@ if __name__ == "__main__":
     subdf_1 = load_timerange_dataset(df, killstart, killend)
     subdf_2 = filter_attacktype_dataset(subdf_1, attacktypes)
     subdf_3 = filter_continent_dataset(subdf_2, scope_selectbox)
-    killdf = load_nkill_dataset(subdf_3)
+    subdf_4 = filter_gname_dataset(subdf_3, selectgroup)
+    killdf = load_nkill_dataset(subdf_4)
     fig_1 = px.choropleth(killdf, locations="country_txt", 
                         locationmode="country names",
                         color="nkill", # lifeExp is a column of gapminder
